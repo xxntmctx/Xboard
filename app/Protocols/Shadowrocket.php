@@ -210,7 +210,7 @@ class Shadowrocket
         }
 
         $query = http_build_query($config, '', '&', PHP_QUERY_RFC3986);
-        $uri = "vless" . "://{$userinfo}?{$query}";
+        $uri = "vless://{$userinfo}?{$query}&fragment=1,40-60,30-50";
         $uri .= "\r\n";
         return $uri;
     }
