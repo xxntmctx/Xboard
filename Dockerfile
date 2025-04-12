@@ -18,7 +18,7 @@ COPY .docker /
 
 # Add build argument for cache busting
 ARG CACHEBUST=1
-ARG REPO_URL=https://github.com/cedar2025/Xboard
+ARG REPO_URL=https://github.com/xxntmctx/Xboard
 RUN git config --global --add safe.directory /www && \
     echo "Cache bust: ${CACHEBUST}" && \
     git clone --depth 1 ${REPO_URL} .
