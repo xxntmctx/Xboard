@@ -127,6 +127,7 @@ class Shadowrocket
         $config = [
             'tfo' => 1,
             'remark' => $server['name'],
+            'fragment' => '1,40-60,30-50,tlshello', // 添加默认的 fragment 配置            
             'alterId' => 0
         ];
 
@@ -195,6 +196,21 @@ class Shadowrocket
                     $config['obfsParam'] = $wsSettings['headers']['Host'];
             }
         }
+
+            
+        case 'httpupgrade':
+            $config['obfs'] = "httpupgrade";
+            if (data_get($protocol_settings, 'network_settings.path')) {
+                $config['path'] = data_get($protocol_settings, 'network_settings.path');
+            }
+
+            if ($host = data_get($protocol_settings, 'network_settings.headers.Host')) {
+                $config['obfsParam'] = $host;
+            }
+            break;           
+            
+
+
         if ($server['network'] === 'grpc') {
             $config['obfs'] = "grpc";
             if ($server['network_settings']) {
