@@ -16,10 +16,10 @@
       title: '{{$title}}',
       assets_path: '/theme/{{$theme}}/assets',
       theme: {
-        color: '{{ $theme_config['theme_color'] ?? "default" }}',
+        color: '{{ isset($theme_config["theme_color"]) ? $theme_config["theme_color"] : "default" }}',
       },
       version: '{{$version}}',
-      background_url: '{{$theme_config['background_url']}}',
+      background_url: '{{$theme_config['background_url'] ?? ""}}',
       description: '{{$description}}',
       i18n: [
         'zh-CN',
@@ -34,7 +34,7 @@
     }
   </script>
   <div id="app"></div>
-  {!! $theme_config['custom_html'] !!}
+  {!! $theme_config['custom_html'] ?? '' !!}
 </body>
 
 </html>
