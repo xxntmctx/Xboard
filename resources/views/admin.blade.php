@@ -12,6 +12,12 @@
       version: "{{ $version }}",
       logo: "{{ $logo }}",
       secure_path: "{{ $secure_path }}",
+      theme: {
+        sidebar: "{{ $theme_sidebar ?? 'light' }}",
+        header: "{{ $theme_header ?? 'dark' }}",
+        color: "{{ $theme_color ?? 'default' }}"
+      },
+      background_url: "{{ $background_url ?? '' }}"
     };
   </script>
   <script type="module" crossorigin src="/assets/admin/assets/index.js"></script>
