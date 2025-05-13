@@ -3,6 +3,7 @@ namespace App\Protocols;
 
 use App\Utils\Helper;
 use App\Contracts\ProtocolInterface;
+use Illuminate\Support\Arr;
 
 class SingBox implements ProtocolInterface
 {
@@ -11,7 +12,7 @@ class SingBox implements ProtocolInterface
     private $user;
     private $config;
 
-    public function __construct($user, $servers, array $options = null)
+    public function __construct($user, $servers)
     {
         $this->user = $user;
         $this->servers = $servers;
@@ -44,7 +45,7 @@ class SingBox implements ProtocolInterface
         if (!empty($template)) {
             return is_array($template) ? $template : json_decode($template, true);
         }
-        
+
         $defaultConfig = base_path('resources/rules/default.sing-box.json');
         $customConfig = base_path('resources/rules/custom.sing-box.json');
         $jsonData = file_exists($customConfig) ? file_get_contents($customConfig) : file_get_contents($defaultConfig);
@@ -70,8 +71,9 @@ class SingBox implements ProtocolInterface
                 $vmessConfig = $this->buildVmess($this->user['uuid'], $item);
                 $proxies[] = $vmessConfig;
             }
-            if ($item['type'] === 'vless' 
-                &&  in_array(data_get($protocol_settings, 'network'), ['tcp', 'ws', 'grpc', 'http', 'quic', 'httpupgrade'])
+            if (
+                $item['type'] === 'vless'
+                && in_array(data_get($protocol_settings, 'network'), ['tcp', 'ws', 'grpc', 'http', 'quic', 'httpupgrade'])
             ) {
                 $vlessConfig = $this->buildVless($this->user['uuid'], $item);
                 $proxies[] = $vlessConfig;
@@ -83,6 +85,14 @@ class SingBox implements ProtocolInterface
             if ($item['type'] === 'tuic') {
                 $tuicConfig = $this->buildTuic($this->user['uuid'], $item);
                 $proxies[] = $tuicConfig;
+            }
+            if ($item['type'] === 'socks') {
+                $socksConfig = $this->buildSocks($this->user['uuid'], $item);
+                $proxies[] = $socksConfig;
+            }
+            if ($item['type'] === 'http') {
+                $httpConfig = $this->buildHttp($this->user['uuid'], $item);
+                $proxies[] = $httpConfig;
             }
         }
         foreach ($outbounds as &$outbound) {
@@ -150,7 +160,7 @@ class SingBox implements ProtocolInterface
         $transport = match ($protocol_settings['network']) {
             'tcp' => [
                 'type' => 'http',
-                'path' => \Arr::random(data_get($protocol_settings, 'network_settings.header.request.path', ['/']))
+                'path' => Arr::random(data_get($protocol_settings, 'network_settings.header.request.path', ['/']))
             ],
             'ws' => [
                 'type' => 'ws',
@@ -298,9 +308,12 @@ class SingBox implements ProtocolInterface
                 'insecure' => (bool) $protocol_settings['tls']['allow_insecure'],
             ]
         ];
+        if (isset($server['ports'])) {
+            $baseConfig['server_ports'][] = str_replace('-', ':', $server['ports']);
+        }
         if ($serverName = data_get($protocol_settings, 'tls_settings.server_name')) {
             $baseConfig['tls']['server_name'] = $serverName;
-        }   
+        }
         $speedConfig = [
             'up_mbps' => $protocol_settings['bandwidth']['up'],
             'down_mbps' => $protocol_settings['bandwidth']['down'],
@@ -357,6 +370,60 @@ class SingBox implements ProtocolInterface
         } else {
             $array['uuid'] = $password;
             $array['password'] = $password;
+        }
+
+        return $array;
+    }
+
+    protected function buildSocks($password, $server): array
+    {
+        $protocol_settings = data_get($server, 'protocol_settings', []);
+        $array = [
+            'type' => 'socks',
+            'tag' => $server['name'],
+            'server' => $server['host'],
+            'server_port' => $server['port'],
+            'version' => '5', // 默认使用 socks5
+            'username' => $password,
+            'password' => $password,
+        ];
+
+        if (data_get($protocol_settings, 'udp_over_tcp')) {
+            $array['udp_over_tcp'] = true;
+        }
+
+        return $array;
+    }
+
+    protected function buildHttp($password, $server): array
+    {
+        $protocol_settings = data_get($server, 'protocol_settings', []);
+        $array = [
+            'type' => 'http',
+            'tag' => $server['name'],
+            'server' => $server['host'],
+            'server_port' => $server['port'],
+            'username' => $password,
+            'password' => $password,
+        ];
+
+        if ($path = data_get($protocol_settings, 'path')) {
+            $array['path'] = $path;
+        }
+
+        if ($headers = data_get($protocol_settings, 'headers')) {
+            $array['headers'] = $headers;
+        }
+
+        if (data_get($protocol_settings, 'tls')) {
+            $array['tls'] = [
+                'enabled' => true,
+                'insecure' => (bool) data_get($protocol_settings, 'tls_settings.allow_insecure', false),
+            ];
+
+            if ($serverName = data_get($protocol_settings, 'tls_settings.server_name')) {
+                $array['tls']['server_name'] = $serverName;
+            }
         }
 
         return $array;
