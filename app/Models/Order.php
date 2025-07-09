@@ -18,6 +18,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $total_amount
  * @property int|null $handling_amount
  * @property int|null $balance_amount
+ * @property int|null $refund_amount
+ * @property int|null $surplus_amount
  * @property int $type
  * @property int $status
  * @property array|null $surplus_order_ids
@@ -86,6 +88,14 @@ class Order extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    /**
+     * 获取邀请人
+     */
+    public function invite_user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'invite_user_id', 'id');
     }
 
     /**

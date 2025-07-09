@@ -162,7 +162,8 @@ window.XBOARD_TRANSLATIONS['zh-CN'] = {
     "orderManagement": "订单管理",
     "couponManagement": "优惠券管理",
     "userManagement": "用户管理",
-    "ticketManagement": "工单管理"
+    "ticketManagement": "工单管理",
+    "trafficResetLogs": "流量重置日志"
   },
   "plugin": {
     "title": "插件管理",
@@ -335,20 +336,60 @@ window.XBOARD_TRANSLATIONS['zh-CN'] = {
             "description": "输入允许的邮箱后缀，每行一个"
           }
         },
-        "recaptcha": {
+        "captcha": {
           "enable": {
-            "label": "启用reCAPTCHA",
-            "description": "开启后用户注册时需要通过reCAPTCHA验证。"
+            "label": "启用验证码",
+            "description": "开启后用户注册时需要通过验证码验证。"
           },
-          "key": {
-            "label": "reCAPTCHA密钥",
-            "placeholder": "输入reCAPTCHA密钥",
-            "description": "输入您的reCAPTCHA密钥"
+          "type": {
+            "label": "验证码类型",
+            "description": "选择要使用的验证码服务类型",
+            "options": {
+              "recaptcha": "Google reCAPTCHA v2",
+              "recaptcha-v3": "Google reCAPTCHA v3",
+              "turnstile": "Cloudflare Turnstile"
+            }
           },
-          "siteKey": {
-            "label": "reCAPTCHA站点密钥",
-            "placeholder": "输入reCAPTCHA站点密钥",
-            "description": "输入您的reCAPTCHA站点密钥"
+          "recaptcha": {
+            "key": {
+              "label": "reCAPTCHA密钥",
+              "placeholder": "输入reCAPTCHA密钥",
+              "description": "输入您的reCAPTCHA密钥"
+            },
+            "siteKey": {
+              "label": "reCAPTCHA站点密钥",
+              "placeholder": "输入reCAPTCHA站点密钥",
+              "description": "输入您的reCAPTCHA站点密钥"
+            }
+          },
+          "recaptcha_v3": {
+            "secretKey": {
+              "label": "reCAPTCHA v3密钥",
+              "placeholder": "输入reCAPTCHA v3密钥",
+              "description": "输入您的reCAPTCHA v3服务器密钥"
+            },
+            "siteKey": {
+              "label": "reCAPTCHA v3站点密钥",
+              "placeholder": "输入reCAPTCHA v3站点密钥",
+              "description": "输入您的reCAPTCHA v3站点密钥"
+            },
+            "scoreThreshold": {
+              "label": "分数阈值",
+              "placeholder": "0.5",
+              "description": "设置验证分数阈值（0-1），分数越高表示越可能是真人操作"
+            }
+          },
+          "turnstile": {
+            "secretKey": {
+              "label": "Turnstile密钥",
+              "placeholder": "输入Turnstile密钥",
+              "description": "输入您的Cloudflare Turnstile密钥"
+            },
+            "siteKey": {
+              "label": "Turnstile站点密钥",
+              "placeholder": "输入Turnstile站点密钥",
+              "description": "输入您的Cloudflare Turnstile站点密钥"
+            }
           }
         },
         "registerLimit": {
@@ -1077,7 +1118,7 @@ window.XBOARD_TRANSLATIONS['zh-CN'] = {
       "uri": "URI",
       "requestData": "请求数据",
       "exception": "异常信息",
-      "totalLogs": "总日志数：{{count}}",
+      "totalLogs": "总日志数",
       "tabs": {
         "all": "全部",
         "info": "信息",
@@ -1089,7 +1130,25 @@ window.XBOARD_TRANSLATIONS['zh-CN'] = {
         "searchOnly": "搜索结果: 包含\"{{keyword}}\"的日志共 {{count}} 条",
         "levelOnly": "筛选结果: 级别为\"{{level}}\"的日志共 {{count}} 条",
         "reset": "重置筛选"
-      }
+      },
+      "clearLogs": "清理日志",
+      "clearDays": "清理天数",
+      "clearDaysDesc": "清理多少天前的日志 (0-365天，0表示今天)",
+      "clearLevel": "日志级别",
+      "clearLimit": "单次限制",
+      "clearLimitDesc": "单次清理数量限制 (100-10000条)",
+      "clearPreview": "清理预览",
+      "getStats": "获取统计",
+      "cutoffDate": "截止日期",
+      "willClear": "将要清理",
+      "logsUnit": " 条日志",
+      "clearWarning": "此操作不可撤销，请谨慎操作！",
+      "clearing": "清理中...",
+      "confirmClear": "确认清理",
+      "clearSuccess": "清理完成！已清理 {{count}} 条日志",
+      "clearFailed": "清理失败",
+      "getStatsFailed": "获取清理统计失败",
+      "clearLogsFailed": "清理日志失败"
     },
     "common": {
       "refresh": "刷新",
@@ -1208,6 +1267,8 @@ window.XBOARD_TRANSLATIONS['zh-CN'] = {
       "basicInfo": "基本信息",
       "amountInfo": "金额信息",
       "timeInfo": "时间信息",
+      "commissionInfo": "佣金信息",
+      "commissionStatusActive": "有效",
       "addOrder": "添加订单",
       "assignOrder": "订单分配",
       "fields": {
@@ -1221,7 +1282,12 @@ window.XBOARD_TRANSLATIONS['zh-CN'] = {
         "refundAmount": "退回金额",
         "deductionAmount": "折抵金额",
         "createdAt": "创建时间",
-        "updatedAt": "更新时间"
+        "updatedAt": "更新时间",
+        "commissionStatus": "佣金状态",
+        "commissionAmount": "佣金金额",
+        "actualCommissionAmount": "实际佣金",
+        "inviteUser": "邀请人",
+        "inviteUserId": "邀请人ID"
       },
       "placeholders": {
         "email": "请输入用户邮箱",
@@ -1338,6 +1404,17 @@ window.XBOARD_TRANSLATIONS['zh-CN'] = {
       },
       "error": {
         "saveFailed": "保存优惠券失败"
+      },
+      "timeRange": {
+        "quickSet": "快速设置",
+        "presets": {
+          "1week": "1周",
+          "2weeks": "2周",
+          "1month": "1个月",
+          "3months": "3个月",
+          "6months": "6个月",
+          "1year": "1年"
+        }
       }
     },
     "period": {
@@ -1589,10 +1666,26 @@ window.XBOARD_TRANSLATIONS['zh-CN'] = {
         "error": "请输入有效的节点名称"
       },
       "rate": {
-        "label": "倍率",
-        "error": "倍率不能为空",
-        "error_numeric": "费率必须是数字",
-        "error_gte_zero": "费率必须大于或等于0"
+        "label": "基础倍率",
+        "error": "基础倍率不能为空",
+        "error_numeric": "基础倍率必须是数字",
+        "error_gte_zero": "基础倍率必须大于或等于0"
+      },
+      "dynamic_rate": {
+        "enable_label": "启用动态倍率",
+        "enable_description": "根据时间段设置不同的倍率乘数",
+        "rules_label": "时间段规则",
+        "add_rule": "添加规则",
+        "rule_title": "规则 {{index}}",
+        "start_time": "开始时间",
+        "end_time": "结束时间",
+        "multiplier": "倍率乘数",
+        "no_rules": "暂无规则，点击上方按钮添加",
+        "start_time_error": "开始时间不能为空",
+        "end_time_error": "结束时间不能为空",
+        "multiplier_error": "倍率乘数不能为空",
+        "multiplier_error_numeric": "倍率乘数必须是数字",
+        "multiplier_error_gte_zero": "倍率乘数必须大于或等于0"
       },
       "code": {
         "label": "自定义节点ID",
@@ -1963,6 +2056,7 @@ window.XBOARD_TRANSLATIONS['zh-CN'] = {
         "assign_order": "分配订单",
         "copy_url": "复制订阅URL",
         "reset_secret": "重置UUID及订阅URL",
+        "reset_traffic": "重置流量",
         "orders": "TA的订单",
         "invites": "TA的邀请",
         "traffic_records": "TA的流量记录",
@@ -2102,6 +2196,7 @@ window.XBOARD_TRANSLATIONS['zh-CN'] = {
       "title": "操作",
       "send_email": "发送邮件",
       "export_csv": "导出 CSV",
+      "traffic_reset_stats": "流量重置统计",
       "batch_ban": "批量封禁",
       "confirm_ban": {
         "title": "确认批量封禁",
@@ -2110,6 +2205,117 @@ window.XBOARD_TRANSLATIONS['zh-CN'] = {
         "cancel": "取消",
         "confirm": "确认封禁",
         "banning": "封禁中..."
+      }
+    },
+    "traffic_reset": {
+      "title": "流量重置",
+      "description": "为用户 {{email}} 重置流量使用量",
+      "tabs": {
+        "reset": "重置流量",
+        "history": "重置历史"
+      },
+      "user_info": "用户信息",
+      "warning": {
+        "title": "重要提醒",
+        "irreversible": "流量重置操作不可逆，请谨慎操作",
+        "reset_to_zero": "重置后用户的上传和下载流量将清零",
+        "logged": "所有重置操作都会被记录在系统日志中"
+      },
+      "reason": {
+        "label": "重置原因",
+        "placeholder": "请输入重置流量的原因（可选）",
+        "optional": "此字段为可选项，用于记录重置原因"
+      },
+      "confirm_reset": "确认重置",
+      "resetting": "重置中...",
+      "reset_success": "流量重置成功",
+      "reset_failed": "流量重置失败",
+      "history": {
+        "summary": "重置概览",
+        "reset_count": "重置次数",
+        "last_reset": "最后重置",
+        "next_reset": "下次重置",
+        "never": "从未重置",
+        "no_schedule": "无定时重置",
+        "records": "重置记录",
+        "recent_records": "最近10次重置记录",
+        "no_records": "暂无重置记录",
+        "reset_time": "重置时间",
+        "traffic_cleared": "清除流量"
+      },
+      "stats": {
+        "title": "流量重置统计",
+        "description": "查看系统流量重置的统计信息",
+        "time_range": "统计时间范围",
+        "total_resets": "总重置次数",
+        "auto_resets": "自动重置",
+        "manual_resets": "手动重置",
+        "cron_resets": "定时重置",
+        "in_period": "最近 {{days}} 天",
+        "breakdown": "重置类型分布",
+        "breakdown_description": "各类型重置操作的百分比分布",
+        "auto_percentage": "自动重置占比",
+        "manual_percentage": "手动重置占比",
+        "cron_percentage": "定时重置占比",
+        "days_options": {
+          "week": "最近一周",
+          "month": "最近一月",
+          "quarter": "最近三月",
+          "year": "最近一年"
+        }
+      }
+    },
+    "traffic_reset_logs": {
+      "title": "流量重置日志",
+      "description": "查看系统中所有流量重置操作的详细记录",
+      "columns": {
+        "id": "日志ID",
+        "user": "用户",
+        "reset_type": "重置类型",
+        "trigger_source": "触发源",
+        "cleared_traffic": "清除流量",
+        "cleared": "已清除",
+        "upload": "上传",
+        "download": "下载",
+        "reset_time": "重置时间",
+        "log_time": "记录时间"
+      },
+      "filters": {
+        "search_user": "搜索用户邮箱...",
+        "reset_type": "重置类型",
+        "trigger_source": "触发源",
+        "all_types": "全部类型",
+        "all_sources": "全部来源",
+        "start_date": "开始日期",
+        "end_date": "结束日期",
+        "apply_date": "应用筛选",
+        "reset": "重置筛选",
+        "filter_title": "筛选条件",
+        "filter_description": "设置筛选条件来查找特定的流量重置记录",
+        "reset_types": {
+          "monthly": "按月重置",
+          "first_day_month": "每月1号重置",
+          "yearly": "按年重置",
+          "first_day_year": "每年1月1日重置",
+          "manual": "手动重置"
+        },
+        "trigger_sources": {
+          "auto": "自动触发",
+          "manual": "手动触发",
+          "cron": "定时任务"
+        }
+      },
+      "actions": {
+        "export": "导出日志",
+        "exporting": "导出中...",
+        "export_success": "导出成功",
+        "export_failed": "导出失败"
+      },
+      "trigger_descriptions": {
+        "manual": "管理员手动执行的流量重置",
+        "cron": "系统定时任务自动执行",
+        "auto": "系统根据条件自动触发",
+        "other": "其他方式触发"
       }
     },
     "messages": {
@@ -2231,6 +2437,10 @@ window.XBOARD_TRANSLATIONS['zh-CN'] = {
           "placeholder": "请输入容量限制",
           "unit": "人"
         },
+        "tags": {
+          "label": "标签",
+          "placeholder": "输入标签后按回车确认"
+        },
         "reset_method": {
           "label": "流量重置方式",
           "placeholder": "请选择重置方式",
@@ -2269,6 +2479,9 @@ window.XBOARD_TRANSLATIONS['zh-CN'] = {
           "success": {
             "add": "套餐添加成功",
             "update": "套餐更新成功"
+          },
+          "error": {
+            "validation": "表单校验失败，请检查并修正错误后重试。"
           }
         }
       },

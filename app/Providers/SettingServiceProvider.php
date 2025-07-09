@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Support\Setting;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Support\Facades\Log;
 
 class SettingServiceProvider extends ServiceProvider
 {

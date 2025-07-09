@@ -9,76 +9,39 @@ use App\Models\Order;
 use App\Models\Plan;
 use App\Models\User;
 use App\Services\Plugin\HookManager;
+use App\Services\TrafficResetService;
+use App\Models\TrafficResetLog;
+use App\Utils\Helper;
+use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
-    private function calcResetDayByMonthFirstDay(): int
-    {
-        $today = (int) date('d');
-        $lastDay = (int) date('d', strtotime('last day of +0 months'));
-        return $lastDay - $today;
-    }
-
-    private function calcResetDayByExpireDay(int $expiredAt)
-    {
-        $day = (int) date('d', $expiredAt);
-        $today = (int) date('d');
-        $lastDay = (int) date('d', strtotime('last day of +0 months'));
-        if ($day >= $today && $day >= $lastDay) {
-            return $lastDay - $today;
-        }
-        if ($day >= $today) {
-            return $day - $today;
-        }
-
-        return $lastDay - $today + $day;
-    }
-
-    private function calcResetDayByYearFirstDay(): int
-    {
-        $nextYear = strtotime(date("Y-01-01", strtotime('+1 year')));
-        return (int) (($nextYear - time()) / 86400);
-    }
-
-    private function calcResetDayByYearExpiredAt(int $expiredAt): int
-    {
-        $md = date('m-d', $expiredAt);
-        $nowYear = strtotime(date("Y-{$md}"));
-        $nextYear = strtotime('+1 year', $nowYear);
-        if ($nowYear > time()) {
-            return (int) (($nowYear - time()) / 86400);
-        }
-        return (int) (($nextYear - time()) / 86400);
-    }
-
+    /**
+     * Get the remaining days until the next traffic reset for a user.
+     * This method reuses the TrafficResetService logic for consistency.
+     */
     public function getResetDay(User $user): ?int
     {
-        // 前置条件检查
-        if ($user->expired_at <= time() || $user->expired_at === null) {
+        // Use TrafficResetService to calculate the next reset time
+        $trafficResetService = app(TrafficResetService::class);
+        $nextResetTime = $trafficResetService->calculateNextResetTime($user);
+
+        if (!$nextResetTime) {
             return null;
         }
 
-        // 获取重置方式逻辑统一
-        $resetMethod = $user->plan->reset_traffic_method === Plan::RESET_TRAFFIC_FOLLOW_SYSTEM
-            ? (int)admin_setting('reset_traffic_method', 0)
-            : $user->plan->reset_traffic_method;
+        // Calculate the remaining days from now to the next reset time
+        $now = time();
+        $resetTimestamp = $nextResetTime->timestamp;
 
-        // 验证重置方式有效性
-        if (!in_array($resetMethod, array_keys(Plan::getResetTrafficMethods()), true)) {
-            return null;
+        if ($resetTimestamp <= $now) {
+            return 0; // Reset time has passed or is now
         }
 
-        // 方法映射表
-        $methodHandlers = [
-            Plan::RESET_TRAFFIC_FIRST_DAY_MONTH => fn() => $this->calcResetDayByMonthFirstDay(),
-            Plan::RESET_TRAFFIC_MONTHLY => fn() => $this->calcResetDayByExpireDay($user->expired_at),
-            Plan::RESET_TRAFFIC_FIRST_DAY_YEAR => fn() => $this->calcResetDayByYearFirstDay(),
-            Plan::RESET_TRAFFIC_YEARLY => fn() => $this->calcResetDayByYearExpiredAt($user->expired_at),
-        ];
+        // Calculate the difference in days (rounded up)
+        $daysDifference = ceil(($resetTimestamp - $now) / 86400);
 
-        $handler = $methodHandlers[$resetMethod] ?? null;
-        
-        return $handler ? $handler() : null;
+        return (int) $daysDifference;
     }
 
     public function isAvailable(User $user)
@@ -154,7 +117,7 @@ class UserService
     {
         list($server, $protocol, $data) = HookManager::filter('traffic.before_process', [
             $server,
-            $protocol, 
+            $protocol,
             $data
         ]);
 
@@ -164,5 +127,122 @@ class UserService
             StatUserJob::dispatch($server, $chunk->toArray(), $protocol, 'd');
             StatServerJob::dispatch($server, $chunk->toArray(), $protocol, 'd');
         });
+    }
+
+    /**
+     * 获取用户流量信息（增加重置检查）
+     */
+    public function getUserTrafficInfo(User $user): array
+    {
+        // 检查是否需要重置流量
+        app(TrafficResetService::class)->checkAndReset($user, TrafficResetLog::SOURCE_USER_ACCESS);
+
+        // 重新获取用户数据（可能已被重置）
+        $user->refresh();
+
+        return [
+            'upload' => $user->u ?? 0,
+            'download' => $user->d ?? 0,
+            'total_used' => $user->getTotalUsedTraffic(),
+            'total_available' => $user->transfer_enable ?? 0,
+            'remaining' => $user->getRemainingTraffic(),
+            'usage_percentage' => $user->getTrafficUsagePercentage(),
+            'next_reset_at' => $user->next_reset_at,
+            'last_reset_at' => $user->last_reset_at,
+            'reset_count' => $user->reset_count,
+        ];
+    }
+
+    /**
+     * 创建用户
+     */
+    public function createUser(array $data): User
+    {
+        $user = new User();
+
+        // 基本信息
+        $user->email = $data['email'];
+        $user->password = isset($data['password'])
+            ? Hash::make($data['password'])
+            : Hash::make($data['email']);
+        $user->uuid = Helper::guid(true);
+        $user->token = Helper::guid();
+
+        // 默认设置
+        $user->remind_expire = admin_setting('default_remind_expire', 1);
+        $user->remind_traffic = admin_setting('default_remind_traffic', 1);
+
+        // 可选字段
+        $this->setOptionalFields($user, $data);
+
+        $user->expired_at = null;
+
+        // 处理计划
+        if (isset($data['plan_id'])) {
+            $this->setPlanForUser($user, $data['plan_id'], $data['expired_at'] ?? null);
+        } else {
+            $this->setTryOutPlan(user: $user);
+        }
+
+        return $user;
+    }
+
+    /**
+     * 设置可选字段
+     */
+    private function setOptionalFields(User $user, array $data): void
+    {
+        $optionalFields = [
+            'invite_user_id',
+            'telegram_id',
+            'group_id',
+            'speed_limit',
+            'expired_at',
+            'transfer_enable'
+        ];
+
+        foreach ($optionalFields as $field) {
+            if (array_key_exists($field, $data)) {
+                $user->{$field} = $data[$field];
+            }
+        }
+    }
+
+    /**
+     * 为用户设置计划
+     */
+    private function setPlanForUser(User $user, int $planId, ?int $expiredAt = null): void
+    {
+        $plan = Plan::find($planId);
+        if (!$plan)
+            return;
+
+        $user->plan_id = $plan->id;
+        $user->group_id = $plan->group_id;
+        $user->transfer_enable = $plan->transfer_enable * 1073741824;
+        $user->speed_limit = $plan->speed_limit;
+
+        if ($expiredAt) {
+            $user->expired_at = $expiredAt;
+        }
+    }
+
+    /**
+     * 设置试用计划
+     */
+    private function setTryOutPlan(User $user): void
+    {
+        if (!(int) admin_setting('try_out_plan_id', 0))
+            return;
+
+        $plan = Plan::find(admin_setting('try_out_plan_id'));
+        if (!$plan)
+            return;
+
+        $user->transfer_enable = $plan->transfer_enable * 1073741824;
+        $user->plan_id = $plan->id;
+        $user->group_id = $plan->group_id;
+        $user->expired_at = time() + (admin_setting('try_out_hour', 1) * 3600);
+        $user->speed_limit = $plan->speed_limit;
     }
 }

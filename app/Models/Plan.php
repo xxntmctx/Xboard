@@ -21,9 +21,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property bool $renew 是否允许续费
  * @property bool $sell 是否允许购买
  * @property array|null $prices 价格配置
+ * @property array|null $tags 标签
  * @property int $sort 排序
  * @property string|null $content 套餐描述
- * @property int $reset_traffic_method 流量重置方式
+ * @property int|null $reset_traffic_method 流量重置方式
  * @property int|null $capacity_limit 订阅人数限制
  * @property int|null $device_limit 设备数量限制
  * @property int $created_at
@@ -85,7 +86,8 @@ class Plan extends Model
         'reset_traffic_method',
         'capacity_limit',
         'sell',
-        'device_limit'
+        'device_limit',
+        'tags'
     ];
 
     protected $casts = [
@@ -95,6 +97,7 @@ class Plan extends Model
         'updated_at' => 'timestamp',
         'group_id' => 'integer',
         'prices' => 'array',
+        'tags' => 'array',
         'reset_traffic_method' => 'integer',
     ];
 
@@ -113,72 +116,6 @@ class Plan extends Model
             self::RESET_TRAFFIC_FIRST_DAY_YEAR => '每年1月1日',
             self::RESET_TRAFFIC_YEARLY => '按年重置',
         ];
-    }
-
-    /**
-     * 获取下一次流量重置时间
-     *
-     * @param Carbon|null $from 计算起始时间，默认为当前时间
-     * @return Carbon|null 下次重置时间，如果不重置则返回null
-     */
-    public function getNextResetTime(?Carbon $from = null): ?Carbon
-    {
-        $from = $from ?? Carbon::now();
-
-        switch ($this->reset_traffic_method) {
-            case self::RESET_TRAFFIC_FIRST_DAY_MONTH:
-                return $from->copy()->addMonth()->startOfMonth();
-
-            case self::RESET_TRAFFIC_MONTHLY:
-                return $from->copy()->addMonth()->startOfDay();
-
-            case self::RESET_TRAFFIC_FIRST_DAY_YEAR:
-                return $from->copy()->addYear()->startOfYear();
-
-            case self::RESET_TRAFFIC_YEARLY:
-                return $from->copy()->addYear()->startOfDay();
-
-            case self::RESET_TRAFFIC_NEVER:
-                return null;
-
-            case self::RESET_TRAFFIC_FOLLOW_SYSTEM:
-            default:
-                // 这里需要实现获取系统设置的逻辑
-                // 可以通过系统配置或其他方式获取
-                return null;
-        }
-    }
-
-    /**
-     * 检查是否需要重置流量
-     *
-     * @param Carbon|null $checkTime 检查时间点，默认为当前时间
-     * @return bool
-     */
-    public function shouldResetTraffic(?Carbon $checkTime = null): bool
-    {
-        if ($this->reset_traffic_method === self::RESET_TRAFFIC_NEVER) {
-            return false;
-        }
-
-        $checkTime = $checkTime ?? Carbon::now();
-        $nextResetTime = $this->getNextResetTime($checkTime);
-
-        if ($nextResetTime === null) {
-            return false;
-        }
-
-        return $checkTime->greaterThanOrEqualTo($nextResetTime);
-    }
-
-    /**
-     * 获取流量重置方式的描述
-     *
-     * @return string
-     */
-    public function getResetTrafficMethodName(): string
-    {
-        return self::getResetTrafficMethods()[$this->reset_traffic_method] ?? '未知';
     }
 
     /**

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\V1\User;
 
-use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\UserChangePassword;
 use App\Http\Requests\User\UserTransfer;
@@ -11,16 +10,24 @@ use App\Models\Order;
 use App\Models\Plan;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Services\Auth\LoginService;
 use App\Services\AuthService;
 use App\Services\UserService;
 use App\Utils\CacheKey;
 use App\Utils\Helper;
-use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 class UserController extends Controller
 {
+    protected $loginService;
+
+    public function __construct(
+        LoginService $loginService
+    ) {
+        $this->loginService = $loginService;
+    }
+
     public function getActiveSession(Request $request)
     {
         $user = User::find($request->user()->id);
@@ -207,15 +214,7 @@ class UserController extends Controller
             return $this->fail([400, __('The user does not exist')]);
         }
 
-        $code = Helper::guid();
-        $key = CacheKey::get('TEMP_TOKEN', $code);
-        Cache::put($key, $user->id, 60);
-        $redirect = '/#/login?verify=' . $code . '&redirect=' . ($request->input('redirect') ? $request->input('redirect') : 'dashboard');
-        if (admin_setting('app_url')) {
-            $url = admin_setting('app_url') . $redirect;
-        } else {
-            $url = url($redirect);
-        }
+        $url = $this->loginService->generateQuickLoginUrl($user, $request->input('redirect'));
         return $this->success($url);
     }
 }
