@@ -199,16 +199,36 @@ class Shadowrocket extends AbstractProtocol
 
 
            
-         case 'httpupgrade':
-             $config['obfs'] = "httpupgrade";
-             if (data_get($protocol_settings, 'network_settings.path')) {
-                 $config['path'] = data_get($protocol_settings, 'network_settings.path');
-             }
- 
-             if ($host = data_get($protocol_settings, 'network_settings.headers.Host')) {
-                 $config['obfsParam'] = $host;
-             }
-             break;           
+                case 'httpupgrade':
+                    $config['obfs'] = "httpupgrade";
+                    if (data_get($protocol_settings, 'network_settings.path')) {
+                        $config['path'] = data_get($protocol_settings, 'network_settings.path');
+                    }
+        
+                    if ($host = data_get($protocol_settings, 'network_settings.host')) {
+                           $config['obfsParam'] = $host;
+                    }
+                    break;           
+                    
+        
+                  
+                   case 'xhttp':
+
+                       $config['obfs'] = "xhttp";
+                       
+
+                       if (data_get($protocol_settings, 'network_settings.path')) {
+                           $config['path'] = data_get($protocol_settings, 'network_settings.path');
+                       }
+           
+
+                       if ($host = data_get($protocol_settings, 'network_settings.host')) {
+
+                           $obfsParam = ['Host' => $host];
+                           $config['obfsParam'] = json_encode($obfsParam);
+                       }
+                       break;      
+                          
              
  
                  
