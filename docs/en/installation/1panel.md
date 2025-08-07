@@ -84,7 +84,7 @@ services:
     depends_on:
       - redis
     command: php artisan octane:start --host=0.0.0.0 --port=7001
-    restart: on-failure
+    restart: unless-stopped
     ports:
       - 7001:7001
     networks:
@@ -98,7 +98,7 @@ services:
       - ./.docker/.data/:/www/.docker/.data
       - ./storage/logs:/www/storage/logs
       - ./plugins:/www/plugins
-    restart: on-failure
+    restart: unless-stopped
     command: php artisan horizon
     networks:
       - 1panel-network
