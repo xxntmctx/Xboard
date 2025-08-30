@@ -67,7 +67,7 @@ git clone -b compose --depth 1 https://github.com/xxntmctx/Xboard ./
 # Configure Docker Compose
 ```
 
-4. Edit docker-compose.yml:
+4. Edit compose.yaml:
 ```yaml
 services:
   web:
