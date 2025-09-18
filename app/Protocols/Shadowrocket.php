@@ -96,6 +96,7 @@ class Shadowrocket extends AbstractProtocol
         $config = [
             'tfo' => 1,
             'remark' => $server['name'],
+            'fragment' => '1,40-60,30-50,tlshello', // 添加默认的 fragment 配置
             'alterId' => 0
         ];
         if ($protocol_settings['tls']) {
@@ -142,6 +143,7 @@ class Shadowrocket extends AbstractProtocol
         $config = [
             'tfo' => 1,
             'remark' => $server['name'],
+            'fragment' => '1,40-60,30-50,tlshello', // 添加默认的 fragment 配置
             'alterId' => 0
         ];
 
