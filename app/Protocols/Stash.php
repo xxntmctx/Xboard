@@ -18,7 +18,7 @@ class Stash extends AbstractProtocol
         Server::TYPE_HYSTERIA,
         Server::TYPE_TROJAN,
         Server::TYPE_TUIC,
-        // Server::TYPE_ANYTLS,
+            // Server::TYPE_ANYTLS,
         Server::TYPE_SOCKS,
         Server::TYPE_HTTP,
     ];
@@ -132,6 +132,17 @@ class Stash extends AbstractProtocol
 
         $config['proxies'] = array_merge($config['proxies'] ? $config['proxies'] : [], $proxy);
         foreach ($config['proxy-groups'] as $k => $v) {
+            if (isset($config['proxy-groups'][$k]['filter'])) {
+                $pattern = $config['proxy-groups'][$k]['filter'];
+                if (strpos($pattern, '/') === false) {
+                    $pattern = '/' . $pattern . '/ui';
+                }
+                $config['proxy-groups'][$k]['proxies'] = array_values(array_filter($proxies, function ($proxy) use ($pattern) {
+                    return $this->isMatch($pattern, $proxy);
+                }));
+                continue;
+            }
+
             if (!is_array($config['proxy-groups'][$k]['proxies']))
                 $config['proxy-groups'][$k]['proxies'] = [];
             $isFilter = false;
@@ -314,10 +325,12 @@ class Stash extends AbstractProtocol
             case 'tcp':
                 if ($headerType = data_get($protocol_settings, 'network_settings.header.type', 'tcp') != 'tcp') {
                     $array['network'] = $headerType;
-                    if ($httpOpts = array_filter([
-                        'headers' => data_get($protocol_settings, 'network_settings.header.request.headers'),
-                        'path' => data_get($protocol_settings, 'network_settings.header.request.path', ['/'])
-                    ])) {
+                    if (
+                        $httpOpts = array_filter([
+                            'headers' => data_get($protocol_settings, 'network_settings.header.request.headers'),
+                            'path' => data_get($protocol_settings, 'network_settings.header.request.path', ['/'])
+                        ])
+                    ) {
                         $array['http-opts'] = $httpOpts;
                     }
                 }
@@ -333,11 +346,11 @@ class Stash extends AbstractProtocol
                 $array['network'] = 'grpc';
                 $array['grpc-opts']['grpc-service-name'] = data_get($protocol_settings, 'network_settings.serviceName');
                 break;
-                // case 'h2':
-                //     $array['network'] = 'h2';
-                //     $array['h2-opts']['host'] = data_get($protocol_settings, 'network_settings.host');
-                //     $array['h2-opts']['path'] = data_get($protocol_settings, 'network_settings.path');
-                //     break;
+            // case 'h2':
+            //     $array['network'] = 'h2';
+            //     $array['h2-opts']['host'] = data_get($protocol_settings, 'network_settings.host');
+            //     $array['h2-opts']['path'] = data_get($protocol_settings, 'network_settings.path');
+            //     break;
         }
 
         return $array;
