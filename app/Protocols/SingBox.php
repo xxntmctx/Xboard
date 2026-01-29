@@ -138,6 +138,53 @@ class SingBox extends AbstractProtocol
         }
         foreach ($outbounds as &$outbound) {
             if (in_array($outbound['type'], ['urltest', 'selector'])) {
+                // 自定义 FILTER:: 和 REGEX:: 前缀筛选逻辑 (SingBox 专用)
+                $proxyTags = array_column($proxies, 'tag'); // 所有节点的 tag 列表
+                if (isset($outbound['outbounds']) && is_array($outbound['outbounds'])) {
+                    $expandedOutbounds = [];
+                    foreach ($outbound['outbounds'] as $item) {
+                        // 检查是否是 FILTER:: 前缀（字符串包含匹配）
+                        if (is_string($item) && strpos($item, 'FILTER::') === 0) {
+                            // 提取关键词
+                            $keyword = substr($item, 8); // 去掉 "FILTER::" 前缀
+                            if (!empty($keyword)) {
+                                // 使用 mb_strpos 查找包含该关键词的所有节点 tag
+                                foreach ($proxyTags as $tag) {
+                                    if (mb_strpos($tag, $keyword) !== false) {
+                                        $expandedOutbounds[] = $tag;
+                                    }
+                                }
+                            }
+                        }
+                        // 检查是否是 REGEX:: 前缀（正则表达式匹配）
+                        elseif (is_string($item) && strpos($item, 'REGEX::') === 0) {
+                            // 提取正则表达式模式
+                            $pattern = substr($item, 7); // 去掉 "REGEX::" 前缀
+                            if (!empty($pattern)) {
+                                // 自动添加定界符和 UTF-8 修饰符（如果用户未提供）
+                                if (strpos($pattern, '/') !== 0) {
+                                    $pattern = '/' . $pattern . '/u';
+                                }
+                                // 使用正则表达式匹配节点 tag
+                                foreach ($proxyTags as $tag) {
+                                    try {
+                                        if (@preg_match($pattern, $tag) === 1) {
+                                            $expandedOutbounds[] = $tag;
+                                        }
+                                    } catch (\Exception $e) {
+                                        // 忽略无效的正则表达式
+                                    }
+                                }
+                            }
+                        } else {
+                            // 普通节点名，保留原样
+                            $expandedOutbounds[] = $item;
+                        }
+                    }
+                    // 去重并更新策略组的 outbounds
+                    $outbound['outbounds'] = array_values(array_unique($expandedOutbounds));
+                }
+
                 array_push($outbound['outbounds'], ...array_column($proxies, 'tag'));
             }
         }
