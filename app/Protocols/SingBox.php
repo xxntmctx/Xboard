@@ -139,12 +139,14 @@ class SingBox extends AbstractProtocol
         foreach ($outbounds as &$outbound) {
             if (in_array($outbound['type'], ['urltest', 'selector'])) {
                 // 自定义 FILTER:: 和 REGEX:: 前缀筛选逻辑 (SingBox 专用)
+                $hasCustomFilter = false; // 标记是否使用了自定义筛选
                 $proxyTags = array_column($proxies, 'tag'); // 所有节点的 tag 列表
                 if (isset($outbound['outbounds']) && is_array($outbound['outbounds'])) {
                     $expandedOutbounds = [];
                     foreach ($outbound['outbounds'] as $item) {
                         // 检查是否是 FILTER:: 前缀（字符串包含匹配）
                         if (is_string($item) && strpos($item, 'FILTER::') === 0) {
+                            $hasCustomFilter = true; // 使用了自定义筛选
                             // 提取关键词
                             $keyword = substr($item, 8); // 去掉 "FILTER::" 前缀
                             if (!empty($keyword)) {
@@ -158,6 +160,7 @@ class SingBox extends AbstractProtocol
                         }
                         // 检查是否是 REGEX:: 前缀（正则表达式匹配）
                         elseif (is_string($item) && strpos($item, 'REGEX::') === 0) {
+                            $hasCustomFilter = true; // 使用了自定义筛选
                             // 提取正则表达式模式
                             $pattern = substr($item, 7); // 去掉 "REGEX::" 前缀
                             if (!empty($pattern)) {
@@ -185,7 +188,10 @@ class SingBox extends AbstractProtocol
                     $outbound['outbounds'] = array_values(array_unique($expandedOutbounds));
                 }
 
-                array_push($outbound['outbounds'], ...array_column($proxies, 'tag'));
+                // 如果没有使用自定义筛选，才添加所有节点
+                if (!$hasCustomFilter) {
+                    array_push($outbound['outbounds'], ...array_column($proxies, 'tag'));
+                }
             }
         }
 
