@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Protocols;
 
@@ -339,7 +339,7 @@ class Stash extends AbstractProtocol
         }
 
         if (data_get($protocol_settings, 'tls')) {
-            $array['client-fingerprint'] = data_get($protocol_settings, 'fingerprint') ?? data_get($protocol_settings, 'network_settings.fingerprint') ?? Helper::getRandFingerprint();
+            $array['client-fingerprint'] = 'chrome';
         }
 
         return $array;
@@ -356,7 +356,7 @@ class Stash extends AbstractProtocol
         $array['uuid'] = $uuid;
         $array['udp'] = true;
 
-        $array['client-fingerprint'] = data_get($protocol_settings, 'fingerprint') ?? data_get($protocol_settings, 'network_settings.fingerprint') ?? Helper::getRandFingerprint();
+        $array['client-fingerprint'] = 'chrome';
 
         switch (data_get($protocol_settings, 'tls')) {
             case 1:
@@ -442,7 +442,7 @@ class Stash extends AbstractProtocol
             $array['sni'] = $serverName;
         }
         $array['skip-cert-verify'] = data_get($protocol_settings, 'allow_insecure');
-        $array['client-fingerprint'] = data_get($protocol_settings, 'fingerprint') ?? data_get($protocol_settings, 'network_settings.fingerprint') ?? Helper::getRandFingerprint();
+        $array['client-fingerprint'] = 'chrome';
         return $array;
     }
 
@@ -591,3 +591,4 @@ class Stash extends AbstractProtocol
         }
     }
 }
+

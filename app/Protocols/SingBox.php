@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 namespace App\Protocols;
 
 use App\Utils\Helper;
@@ -252,7 +252,7 @@ class SingBox extends AbstractProtocol
                 'insecure' => (bool) data_get($protocol_settings, 'tls_settings.allow_insecure'),
                 'utls' => [
                     'enabled' => true,
-                    'fingerprint' => data_get($protocol_settings, 'fingerprint') ?? data_get($protocol_settings, 'network_settings.fingerprint') ?? Helper::getRandFingerprint()
+                    'fingerprint' => 'chrome'
                 ]
             ] : null
         ];
@@ -305,7 +305,7 @@ class SingBox extends AbstractProtocol
                 'insecure' => (bool) data_get($protocol_settings, 'tls_settings.allow_insecure'),
                 'utls' => [
                     'enabled' => true,
-                    'fingerprint' => data_get($protocol_settings, 'fingerprint') ?? data_get($protocol_settings, 'network_settings.fingerprint') ?? Helper::getRandFingerprint()
+                    'fingerprint' => 'chrome'
                 ]
             ];
 
@@ -379,7 +379,7 @@ class SingBox extends AbstractProtocol
                 'insecure' => (bool) data_get($protocol_settings, 'allow_insecure', false),
                 'utls' => [
                     'enabled' => true,
-                    'fingerprint' => data_get($protocol_settings, 'fingerprint') ?? data_get($protocol_settings, 'network_settings.fingerprint') ?? Helper::getRandFingerprint()
+                    'fingerprint' => 'chrome'
                 ]
             ]
         ];
@@ -567,3 +567,4 @@ class SingBox extends AbstractProtocol
         return $array;
     }
 }
+
