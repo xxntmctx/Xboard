@@ -250,6 +250,10 @@ class SingBox extends AbstractProtocol
             'tls' => $protocol_settings['tls'] ? [
                 'enabled' => true,
                 'insecure' => (bool) data_get($protocol_settings, 'tls_settings.allow_insecure'),
+                'utls' => [
+                    'enabled' => true,
+                    'fingerprint' => data_get($protocol_settings, 'fingerprint', data_get($protocol_settings, 'network_settings.fingerprint', Helper::getRandFingerprint()))
+                ]
             ] : null
         ];
         if ($serverName = data_get($protocol_settings, 'tls_settings.server_name')) {
@@ -373,6 +377,10 @@ class SingBox extends AbstractProtocol
             'tls' => [
                 'enabled' => true,
                 'insecure' => (bool) data_get($protocol_settings, 'allow_insecure', false),
+                'utls' => [
+                    'enabled' => true,
+                    'fingerprint' => data_get($protocol_settings, 'fingerprint', data_get($protocol_settings, 'network_settings.fingerprint', Helper::getRandFingerprint()))
+                ]
             ]
         ];
         if ($serverName = data_get($protocol_settings, 'server_name')) {
