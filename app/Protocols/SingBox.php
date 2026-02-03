@@ -301,7 +301,7 @@ class SingBox extends AbstractProtocol
                 'insecure' => (bool) data_get($protocol_settings, 'tls_settings.allow_insecure'),
                 'utls' => [
                     'enabled' => true,
-                    'fingerprint' => Helper::getRandFingerprint()
+                    'fingerprint' => data_get($protocol_settings, 'fingerprint', data_get($protocol_settings, 'network_settings.fingerprint', Helper::getRandFingerprint()))
                 ]
             ];
 
