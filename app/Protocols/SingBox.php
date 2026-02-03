@@ -455,13 +455,14 @@ class SingBox extends AbstractProtocol
             $array['tls'] = [
                 'enabled' => true,
                 'insecure' => (bool) data_get($protocol_settings, 'tls_settings.allow_insecure'),
-            ];
-
-            $this->appendUtls($array['tls'], $protocol_settings);
-
-            if ($serverName = data_get($protocol_settings, 'tls_settings.server_name')) {
-                $array['tls']['server_name'] = $serverName;
-            }
+                'utls' => [
+                    'enabled' => true,
+                    'fingerprint' => data_get($protocol_settings, 'fingerprint', data_get($protocol_settings, 'network_settings.fingerprint', Helper::getRandFingerprint()))
+                ]
+            ] : null
+        ];
+        if ($serverName = data_get($protocol_settings, 'tls_settings.server_name')) {
+            $array['tls']['server_name'] = $serverName;
         }
 
         $this->appendMultiplex($array, $protocol_settings);
@@ -537,6 +538,14 @@ class SingBox extends AbstractProtocol
             'server' => $server['host'],
             'server_port' => $server['port'],
             'password' => $password,
+            'tls' => [
+                'enabled' => true,
+                'insecure' => (bool) data_get($protocol_settings, 'allow_insecure', false),
+                'utls' => [
+                    'enabled' => true,
+                    'fingerprint' => data_get($protocol_settings, 'fingerprint', data_get($protocol_settings, 'network_settings.fingerprint', Helper::getRandFingerprint()))
+                ]
+            ]
         ];
 
         $tlsMode = (int) data_get($protocol_settings, 'tls', 1);
