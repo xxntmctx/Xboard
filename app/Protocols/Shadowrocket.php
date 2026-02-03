@@ -108,7 +108,7 @@ class Shadowrocket extends AbstractProtocol
                     $config['peer'] = data_get($protocol_settings, 'tls_settings.server_name');
             }
         }
-        $config['fp'] = data_get($protocol_settings, 'fingerprint') ?? data_get($protocol_settings, 'network_settings.fingerprint') ?? Helper::getRandFingerprint();
+        $config['fp'] = 'chrome';
 
         switch (data_get($protocol_settings, 'network')) {
             case 'tcp':
@@ -186,14 +186,14 @@ class Shadowrocket extends AbstractProtocol
                 if ($serverName = data_get($protocol_settings, 'tls_settings.server_name')) {
                     $config['peer'] = $serverName;
                 }
-                $config['fp'] = data_get($protocol_settings, 'fingerprint') ?? data_get($protocol_settings, 'network_settings.fingerprint') ?? Helper::getRandFingerprint();
+                $config['fp'] = 'chrome';
                 break;
             case 2:
                 $config['tls'] = 1;
                 $config['sni'] = data_get($protocol_settings, 'reality_settings.server_name');
                 $config['pbk'] = data_get($protocol_settings, 'reality_settings.public_key');
                 $config['sid'] = data_get($protocol_settings, 'reality_settings.short_id');
-                $config['fp'] = data_get($protocol_settings, 'fingerprint') ?? data_get($protocol_settings, 'network_settings.fingerprint') ?? Helper::getRandFingerprint();
+                $config['fp'] = 'chrome';
                 break;
             default:
                 break;
@@ -287,7 +287,7 @@ class Shadowrocket extends AbstractProtocol
                 }
                 break;
         }
-        $params['fp'] = data_get($protocol_settings, 'fingerprint') ?? data_get($protocol_settings, 'network_settings.fingerprint') ?? Helper::getRandFingerprint();
+        $params['fp'] = 'chrome';
         switch (data_get($protocol_settings, 'network')) {
             case 'grpc':
                 $params['obfs'] = 'grpc';
