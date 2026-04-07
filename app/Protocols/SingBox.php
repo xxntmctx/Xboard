@@ -459,10 +459,10 @@ class SingBox extends AbstractProtocol
                     'enabled' => true,
                     'fingerprint' => 'chrome'
                 ]
-            ] : null
-        ];
-        if ($serverName = data_get($protocol_settings, 'tls_settings.server_name')) {
-            $array['tls']['server_name'] = $serverName;
+            ];
+            if ($serverName = data_get($protocol_settings, 'tls_settings.server_name')) {
+                $array['tls']['server_name'] = $serverName;
+            }
         }
 
         $this->appendMultiplex($array, $protocol_settings);
