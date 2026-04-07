@@ -89,7 +89,7 @@ class General extends AbstractProtocol
             "host" => "",
             "path" => "",
             "tls" => $protocol_settings['tls'] ? "tls" : "",
-            "fp" => data_get($protocol_settings, 'fingerprint') ?? data_get($protocol_settings, 'network_settings.fingerprint') ?? Helper::getRandFingerprint(),
+            "fp" => data_get($protocol_settings, 'fingerprint') ?? data_get($protocol_settings, 'network_settings.fingerprint') ?? Helper::getTlsFingerprint(),
         ];
         if ($serverName = data_get($protocol_settings, 'tls_settings.server_name')) {
             $config['sni'] = $serverName;
@@ -221,6 +221,7 @@ class General extends AbstractProtocol
         }
 
         $user = $uuid . '@' . Helper::wrapIPv6($host) . ':' . $port;
+        $config['ech'] = 'cloudflare-ech.com+https://223.5.5.5/dns-query';
         $query = http_build_query($config);
         $fragment = urlencode($name);
         $link = sprintf("vless://%s?%s#%s\r\n", $user, $query, $fragment);
@@ -255,7 +256,7 @@ class General extends AbstractProtocol
                 }
                 break;
         }
-        $array['fp'] = data_get($protocol_settings, 'fingerprint') ?? data_get($protocol_settings, 'network_settings.fingerprint') ?? Helper::getRandFingerprint();
+        $array['fp'] = data_get($protocol_settings, 'fingerprint') ?? data_get($protocol_settings, 'network_settings.fingerprint') ?? Helper::getTlsFingerprint();
         switch ($server['protocol_settings']['network']) {
             case 'ws':
                 $array['type'] = 'ws';
@@ -286,6 +287,7 @@ class General extends AbstractProtocol
             default:
                 break;
         }
+        $array['ech'] = 'cloudflare-ech.com+https://223.5.5.5/dns-query';
         $query = http_build_query($array);
         $addr = Helper::wrapIPv6($server['host']);
 
@@ -317,6 +319,7 @@ class General extends AbstractProtocol
                 $params['mport'] = $server['ports'];
             }
 
+            $params['ech'] = 'cloudflare-ech.com+https://223.5.5.5/dns-query';
             $query = http_build_query($params);
             $uri = "hysteria2://{$password}@{$addr}:{$server['port']}?{$query}#{$name}";
         } else {
@@ -331,6 +334,7 @@ class General extends AbstractProtocol
                 $params['obfsParam'] = $obfsPassword;
             }
 
+            $params['ech'] = 'cloudflare-ech.com+https://223.5.5.5/dns-query';
             $query = http_build_query($params);
             $uri = "hysteria://{$addr}:{$server['port']}?{$query}#{$name}";
         }
@@ -376,6 +380,7 @@ class General extends AbstractProtocol
         if (data_get($protocol_settings, 'tls.allow_insecure')) {
             $queryParams['insecure'] = '1';
         }
+        $queryParams['ech'] = 'cloudflare-ech.com+https://223.5.5.5/dns-query';
 
         $query = http_build_query($queryParams);
 
@@ -404,6 +409,7 @@ class General extends AbstractProtocol
             'sni' => data_get($protocol_settings, 'tls.server_name'),
             'insecure' => data_get($protocol_settings, 'tls.allow_insecure')
         ];
+        $params['ech'] = 'cloudflare-ech.com+https://223.5.5.5/dns-query';
         $query = http_build_query($params);
         $addr = Helper::wrapIPv6($server['host']);
         $uri = "anytls://{$password}@{$addr}:{$server['port']}?{$query}#{$name}";
@@ -435,6 +441,7 @@ class General extends AbstractProtocol
             $params['allowInsecure'] = data_get($protocol_settings, 'tls_settings.allow_insecure') ? '1' : '0';
         }
 
+        $params['ech'] = 'cloudflare-ech.com+https://223.5.5.5/dns-query';
         $uri = "http://{$credentials}@{$addr}:{$server['port']}";
         if (!empty($params)) {
             $uri .= '?' . http_build_query($params);
