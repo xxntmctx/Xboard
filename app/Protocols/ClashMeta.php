@@ -767,10 +767,6 @@ class ClashMeta extends AbstractProtocol
 
     protected static function appendUtls(&$array, $protocol_settings)
     {
-        if ($utls = data_get($protocol_settings, 'utls')) {
-            if (data_get($utls, 'enabled')) {
-                $array['client-fingerprint'] = Helper::getTlsFingerprint($utls);
-            }
-        }
+        $array['client-fingerprint'] = 'chrome';
     }
 }
