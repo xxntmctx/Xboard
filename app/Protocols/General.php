@@ -134,6 +134,18 @@ class General extends AbstractProtocol
                     $config['path'] = $path;
                 $config['host'] = data_get($protocol_settings, 'network_settings.host', $server['host']);
                 break;
+            case 'xhttp':
+                $config['net'] = 'xhttp';
+                $config['type'] = 'xhttp';
+                if ($path = data_get($protocol_settings, 'network_settings.path'))
+                    $config['path'] = $path;
+                if ($host = data_get($protocol_settings, 'network_settings.host', $server['host']))
+                    $config['host'] = $host;
+                if ($mode = data_get($protocol_settings, 'network_settings.mode', 'auto'))
+                    $config['mode'] = $mode;
+                if ($extra = data_get($protocol_settings, 'network_settings.extra'))
+                    $config['extra'] = is_string($extra) ? $extra : json_encode($extra);
+                break;
             default:
                 break;
         }
@@ -210,10 +222,14 @@ class General extends AbstractProtocol
                 $config['host'] = data_get($protocol_settings, 'network_settings.host', $server['host']);
                 break;
             case 'xhttp':
-                $config['path'] = data_get($protocol_settings, 'network_settings.path');
-                $config['host'] = data_get($protocol_settings, 'network_settings.host', $server['host']);
-                $config['mode'] = data_get($protocol_settings, 'network_settings.mode', 'auto');
-                $config['extra'] = json_encode(data_get($protocol_settings, 'network_settings.extra'));
+                if ($path = data_get($protocol_settings, 'network_settings.path'))
+                    $config['path'] = $path;
+                if ($host = data_get($protocol_settings, 'network_settings.host', $server['host']))
+                    $config['host'] = $host;
+                if ($mode = data_get($protocol_settings, 'network_settings.mode', 'auto'))
+                    $config['mode'] = $mode;
+                if ($extra = data_get($protocol_settings, 'network_settings.extra'))
+                    $config['extra'] = is_string($extra) ? $extra : json_encode($extra);
                 break;
         }
 
@@ -276,6 +292,17 @@ class General extends AbstractProtocol
                 if ($path = data_get($protocol_settings, 'network_settings.path'))
                     $array['path'] = $path;
                 $array['host'] = data_get($protocol_settings, 'network_settings.host', $server['host']);
+                break;
+            case 'xhttp':
+                $array['type'] = 'xhttp';
+                if ($path = data_get($protocol_settings, 'network_settings.path'))
+                    $array['path'] = $path;
+                if ($host = data_get($protocol_settings, 'network_settings.host', $server['host']))
+                    $array['host'] = $host;
+                if ($mode = data_get($protocol_settings, 'network_settings.mode', 'auto'))
+                    $array['mode'] = $mode;
+                if ($extra = data_get($protocol_settings, 'network_settings.extra'))
+                    $array['extra'] = is_string($extra) ? $extra : json_encode($extra);
                 break;
             default:
                 break;
